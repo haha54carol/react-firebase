@@ -1,15 +1,53 @@
 import React, { Component } from 'react';
 import { db } from '../firebase'
 
+
 class Message extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
             msg: '',
-            error: null
+            remoteData: null,
+            error: null,
+            status: ''
         }
+
+        this.updateMe = this.updateMe.bind(this)
     }
+
+    componentDidMount() {
+        db.onDataChanged(this.updateMe)
+    };
+
+    updateMe(snapshot) {
+        const { remoteData } = this.state
+        const newVal = snapshot.val()
+
+        console.log('newVal:' + newVal)
+
+        if (remoteData) {
+            if (newVal > remoteData) {
+                this.setState({
+                    status: 'up',
+                    remoteData: newVal
+                })
+            } else {
+                this.setState({
+                    status: 'down',
+                    remoteData: newVal
+                })
+            }
+        } else {
+            this.setState({ remoteData: newVal })
+        }
+
+    }
+
+    delField(name) {
+        db.deleteField(name)
+    }
+
 
     onSubmit(event) {
 
@@ -17,7 +55,6 @@ class Message extends Component {
 
         db.sendMessage(msg)
             .then(() => {
-                console.log('send msg')
                 this.setState(() => ({ msg: '', error: null }))
             })
             .catch(error => {
@@ -30,11 +67,13 @@ class Message extends Component {
 
     render() {
 
-        const { msg, error } = this.state
+        const { msg, error, remoteData, status } = this.state
 
+        const backgroundColor = status === 'up' ? 'yellowgreen' : 'powderblue'
         return (
             <div>
-                <div>msg: {msg}</div>
+                <div>remoteData: {remoteData}</div>
+                <div style={{ backgroundColor }} > status: {status}</div>
                 <input
                     vaule={msg}
                     onChange={e => this.setState({ msg: e.target.value })}
@@ -44,8 +83,10 @@ class Message extends Component {
                 <button onClick={e => this.onSubmit(e)}>
                     send
                 </button>
+
+                <button onClick={e => this.delField('items')}>Delete Items</button>
                 {error && <p>{error.message}</p>}
-            </div>
+            </div >
 
         )
     }

@@ -1,4 +1,4 @@
-import { auth } from './firebase'
+import { auth, provider } from './firebase'
 
 //sign up
 export const doCreateUserWithEmailAndPassword = (email, pwd) =>
@@ -20,3 +20,5 @@ export const doPasswordReset = (email) =>
 export const doPasswordUpdate = (pwd) =>
     auth.currentUser.updatePassword(pwd)
 
+export const signInWithPopUp = () =>
+    auth.signInWithPopup(provider)
