@@ -13,7 +13,8 @@ class SignIn extends Component {
         super(props)
         this.state = { ...INITIAL_STATE }
 
-        this.login = this.login.bind(this)
+        this.signInWithGoogle = this.signInWithGoogle.bind(this)
+        this.signInWithGithub = this.signInWithGithub.bind(this)
         this.signInWithEmailAndPassword = this.signInWithEmailAndPassword.bind(this)
     }
 
@@ -29,28 +30,34 @@ class SignIn extends Component {
             })
 
     }
-
-    login(event) {
-
-
-
-        auth.signInWithPopUp()
+    signInWithGoogle() {
+        auth.signInWithGoogle()
             .then(result => {
                 const user = result.user
                 this.setState({ user })
             })
             .catch(error => {
-                this.setState({ error })
+                this.setState({ error: error.message })
             })
+    }
 
-        event.preventDefault()
+    signInWithGithub() {
+        auth.signInWithGithub()
+            .then(result => {
+                const user = result.user.displayName
+                this.setState({ user })
+            })
+            .catch(error => {
+                this.setState({ error: error.message })
+            })
     }
 
     render() {
-        const { email, password, error } = this.state
+        const { email, password, error, user } = this.state
         return (
             <div>
                 <h1>Sign In</h1>
+                {user ? <h5>{user}</h5> : null}
                 <div>
                     <span>Email:</span>
                     <input
@@ -69,7 +76,8 @@ class SignIn extends Component {
                 </div>
                 {error ? <p>{error}</p> : null}
                 <button onClick={() => this.signInWithEmailAndPassword()}>Sign In with Email</button>
-                <button onClick={e => this.login(e)}>Sign In with google</button>
+                <button onClick={() => this.signInWithGithub()}>Sign In with Github</button>
+                <button onClick={() => this.signInWithGoogle()}>Sign In with google</button>
 
             </div>
         )
